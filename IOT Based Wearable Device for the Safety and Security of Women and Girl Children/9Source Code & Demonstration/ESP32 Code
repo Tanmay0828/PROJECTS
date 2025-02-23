@@ -1,0 +1,87 @@
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL3lg7ZDpv1"
+#define BLYNK_DEVICE_NAME "health monitoring system"
+
+#include <BlynkSimpleEsp32.h>
+#include <Wire.h>
+#include "MAX30105.h"  // Library for MAX30105 Pulse Oximeter & Heart Rate Sensor
+#include "heartRate.h"  // Library for Heart Rate Calculation
+
+// Blynk authentication credentials
+char auth[] = "7hN_I0IvfZgDsEbQXpsiYZ2yUxcP0Nhi";
+char ssid[] = "IOT";  // WiFi SSID
+char pass[] = "1234567890";  // WiFi Password
+
+MAX30105 particleSensor;  // Create sensor object
+
+// Constants and variables for heart rate calculation
+const byte RATE_SIZE = 4;  // Number of readings for averaging heart rate
+byte rates[RATE_SIZE];  // Array to store heart rate readings
+byte rateSpot = 0;  // Position in array
+long lastBeat = 0;  // Timestamp of last beat detected
+float beatsPerMinute;
+int beatAvg;
+int spo2;
+
+void setup() {
+  Serial.begin(9600);
+  Blynk.begin(auth, ssid, pass);
+
+  // Attempt to connect to WiFi
+  Serial.print("Connecting to WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println(" Connected!");
+
+  // Initialize MAX30105 sensor
+  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
+    Serial.println(F("MAX30105 not found. Check wiring!"));
+    while (1);
+  }
+
+  // Sensor configuration
+  particleSensor.setup();
+  particleSensor.setPulseAmplitudeRed(0x0A);  // Low Red LED to indicate working
+  particleSensor.setPulseAmplitudeGreen(0);   // Turn off Green LED
+  particleSensor.enableDIETEMPRDY();  // Enable temperature measurement
+}
+
+void loop() {
+  Blynk.run();  // Keep Blynk connected
+  
+  long irValue = particleSensor.getIR();  // Get IR sensor value
+  float temperature = particleSensor.readTemperature();  // Read temperature
+  
+  // Check if a heartbeat is detected
+  if (checkForBeat(irValue)) {
+    long delta = millis() - lastBeat;  // Time between beats
+    lastBeat = millis();
+
+    beatsPerMinute = 60.0 / (delta / 1000.0);  // Calculate BPM
+
+    if (beatsPerMinute > 20 && beatsPerMinute < 255) {
+      rates[rateSpot++] = (byte)beatsPerMinute;  // Store BPM in array
+      rateSpot %= RATE_SIZE;  // Reset index if exceeding array size
+
+      // Compute average heart rate
+      beatAvg = 0;
+      for (byte x = 0; x < RATE_SIZE; x++)
+        beatAvg += rates[x];
+      beatAvg /= RATE_SIZE;
+    }
+
+    // Send sensor values to Blynk
+    Blynk.virtualWrite(V0, beatAvg);
+    Blynk.virtualWrite(V1, temperature);
+    Blynk.virtualWrite(V2, random(91, 98));  // Placeholder for SpO2 (should be computed properly)
+  }
+
+  // If no valid IR signal detected, reset values to 0
+  if (irValue < 50000) {
+    Blynk.virtualWrite(V0, 0);
+    Blynk.virtualWrite(V1, 0);
+    Blynk.virtualWrite(V2, 0);
+  }
+}
