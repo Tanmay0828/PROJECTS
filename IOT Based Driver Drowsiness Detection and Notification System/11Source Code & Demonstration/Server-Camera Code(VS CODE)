@@ -1,0 +1,95 @@
+import cv2
+import numpy as np
+import requests
+import time  # Import time module for accurate delays
+
+# Load Haar cascades for face and eye detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+
+ESP32_URL = 'http://192.168.178.5/alert'  # Adjust ESP32 IP
+
+# Alert management
+last_alert_time = {'no_face': 0, 'drowsy': 0}
+alert_interval = 5  # Prevent spam (seconds)
+
+def send_alert(alert_type):
+    """Send alert to ESP32 with cooldown."""
+    global last_alert_time
+    current_time = time.time()
+    
+    if current_time - last_alert_time[alert_type] >= alert_interval:
+        try:
+            response = requests.get(ESP32_URL, params={'alert': alert_type}, timeout=3)
+            if response.status_code == 200:
+                print(f"Alert sent: {alert_type}")
+                last_alert_time[alert_type] = current_time
+            else:
+                print(f"Failed to send alert: {alert_type}")
+        except requests.exceptions.RequestException as e:
+            print(f"Alert error: {e}")
+
+def main():
+    CONSECUTIVE_FRAMES = 150  # Number of frames before drowsiness alert
+    COUNTER = 0
+    face_not_detected_start = None
+    detection_duration = 5  # 5 seconds
+
+    cap = cv2.VideoCapture(0)
+
+    if not cap.isOpened():
+        print("Error: Could not open camera.")
+        return
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Camera read failed.")
+            break
+
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5)
+
+        if len(faces) == 0:
+            if face_not_detected_start is None:
+                face_not_detected_start = time.time()  # Start timer
+            elif time.time() - face_not_detected_start >= detection_duration:
+                cv2.putText(frame, "Alert: No Face Detected!", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                print("No face detected for 5 seconds!")
+                send_alert('no_face')
+        else:
+            face_not_detected_start = None  # Reset timer
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            cv2.putText(frame, "Face Detected", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+
+            roi_gray = gray_frame[y:y + h, x:x + w]
+            roi_color = frame[y:y + h, x:x + w]
+            eyes = eye_cascade.detectMultiScale(roi_gray)
+
+            eye_count = sum(1 for _ in eyes)  # Count detected eyes
+
+            for (ex, ey, ew, eh) in eyes:
+                center = (ex + ew // 2, ey + eh // 2)
+                cv2.circle(roi_color, center, 5, (0, 0, 255), -1)
+
+            if eye_count < 2:
+                COUNTER += 1
+                if COUNTER >= CONSECUTIVE_FRAMES:
+                    cv2.putText(frame, "Drowsy!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    print("Drowsiness detected!")
+                    send_alert('drowsy')
+            else:
+                COUNTER = 0  # Reset if eyes are open
+
+        cv2.imshow("Drowsiness Detection", frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
