@@ -1,0 +1,135 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
+#include <TinyGPS.h>
+#include <SoftwareSerial.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+// Initialize MPU6050 sensor
+Adafruit_MPU6050 mpu;
+
+// Define software serial for GPS communication
+SoftwareSerial serial(D6, D7); // RX, TX
+TinyGPS gps;
+
+// WiFi credentials
+#define WIFI_SSID "IOT"
+#define WIFI_PASSWORD "1234567890"
+
+// Telegram bot token (keep this secure)
+#define BOT_TOKEN "7083263107:AAEpTFn-aQKATAKF10q62NOrsrZkW5ewbKM"
+
+// Telegram bot setup
+const unsigned long BOT_MTBS = 1000;  // Bot polling interval in milliseconds
+X509List cert(TELEGRAM_CERTIFICATE_ROOT);
+WiFiClientSecure secured_client;
+UniversalTelegramBot bot(BOT_TOKEN, secured_client);
+unsigned long bot_lasttime;
+
+// Variables to store chat IDs and GPS coordinates
+String text;
+String chat_id;
+String chatid = "-4146409240";  // Telegram Group ID
+float flat = 0.0, flon = 0.0;
+
+// Function to handle incoming Telegram messages
+void handleNewMessages(int numNewMessages) {
+  Serial.print("Received Messages: ");
+  Serial.println(numNewMessages);
+
+  for (int i = 0; i < numNewMessages; i++) {
+    chat_id = bot.messages[i].chat_id;
+    text = bot.messages[i].text;
+    Serial.println("Message: " + text);
+
+    // Send location if "location" command is received
+    if (text == "location" && chat_id == chatid) {
+      String locationMessage = "Your location: http://maps.google.com/maps?q=" + String(flat, 4) + "," + String(flon, 4);
+      bot.sendMessage(chatid, locationMessage, "");
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(D5, INPUT_PULLUP);  // SOS button
+  serial.begin(9600);  // GPS baud rate
+
+  Serial.println("Initializing MPU6050...");
+  if (!mpu.begin()) {
+    Serial.println("MPU6050 Not Found!");
+    while (1) delay(10);
+  }
+  Serial.println("MPU6050 Ready!");
+
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println("\nWiFi Connected: " + WiFi.localIP().toString());
+
+  // Configure secure connection for Telegram
+  configTime(0, 0, "pool.ntp.org");
+  secured_client.setTrustAnchors(&cert);
+
+  bot_lasttime = millis();
+}
+
+void loop() {
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+  // Read GPS data
+  bool newData = false;
+  for (unsigned long start = millis(); millis() - start < 1000;) {
+    while (serial.available()) {
+      char c = serial.read();
+      if (gps.encode(c)) newData = true;
+    }
+  }
+
+  // If new GPS data is available, update location
+  if (newData) {
+    unsigned long age;
+    gps.f_get_position(&flat, &flon, &age);
+  }
+
+  // Construct Google Maps location link
+  String locationMessage = "http://maps.google.com/maps?q=" + String(flat, 4) + "," + String(flon, 4);
+
+  // Accident Detection based on MPU6050 acceleration values
+  if (a.acceleration.x < -2.99 || a.acceleration.x > 2.20 || 
+      a.acceleration.y < -2.30 || a.acceleration.y > 2.01 || 
+      a.acceleration.z < 2.00) {
+    bot.sendMessage(chatid, "\u26A0\uFE0F Vehicle Accident Detected!", "");
+    bot.sendMessage(chatid, locationMessage, "");
+  }
+  
+  // SOS Button Press Detection
+  if (digitalRead(D5) == LOW) {
+    bot.sendMessage(chatid, "\uD83D\uDEA8 SOS Alert!", "");
+    bot.sendMessage(chatid, locationMessage, "");
+  }
+
+  // WiFi Reconnection if Disconnected
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi Disconnected! Reconnecting...");
+    WiFi.disconnect();
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  }
+
+  // Check for new Telegram messages periodically
+  if (millis() - bot_lasttime > BOT_MTBS) {
+    int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    while (numNewMessages) {
+      handleNewMessages(numNewMessages);
+      numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+    }
+    bot_lasttime = millis();
+  }
+}
