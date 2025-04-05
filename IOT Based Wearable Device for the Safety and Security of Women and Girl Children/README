@@ -1,0 +1,127 @@
+ 🩺🚨 Smart Health & Accident Monitoring System
+
+## 🔍 Project Overview
+
+This project is a real-time embedded system designed to monitor health parameters such as heart rate, temperature, and SpO₂, and also detect vehicle accidents using motion sensors. It sends live health stats to the **Blynk** mobile dashboard and triggers emergency alerts via **Telegram Bot**, including location sharing.
+
+---
+
+## ✨ Features
+
+- 📡 **Health Monitoring (ESP32 + MAX30105)**  
+  - Heart rate detection  
+  - Body temperature monitoring  
+  - SpO₂ (blood oxygen level) estimation  
+
+- 🛡️ **Accident Detection (ESP8266 + MPU6050 + GPS)**  
+  - Detects abrupt motion indicating an accident  
+  - Shares GPS location via Telegram  
+  - SOS button for manual emergency alerts  
+
+- 📲 **Real-time Notifications**
+  - Blynk app dashboard shows live health data  
+  - Telegram bot sends accident alerts and location  
+
+---
+
+## 🧠 Tech Stack
+
+### 🔌 Hardware
+
+- ESP32 (for health monitoring)
+- ESP8266 (for accident monitoring)
+- MAX30105 Pulse Oximeter Sensor
+- MPU6050 Accelerometer & Gyroscope
+- NEO-6M GPS Module
+- Push Button (for SOS trigger)
+
+### 💻 Software & Libraries
+
+- **Arduino IDE**
+- Blynk IoT Platform
+- Telegram Bot API
+- WiFiClientSecure
+- TinyGPS
+- Adafruit MPU6050
+- MAX30105 & HeartRate Libraries
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1. 🔧 Arduino Libraries Required
+
+Install the following libraries from Arduino Library Manager:
+
+- `Blynk`
+- `MAX30105`
+- `heartRate`
+- `Adafruit_MPU6050`
+- `TinyGPS`
+- `WiFiClientSecure`
+- `UniversalTelegramBot`
+
+### 2. 🔐 Blynk Configuration
+
+Replace the placeholders in your ESP32 sketch:
+```cpp
+char auth[] = "Your_Blynk_Auth_Token";
+char ssid[] = "Your_WiFi_SSID";
+char pass[] = "Your_WiFi_Password";
+```
+
+Create Virtual Pins in Blynk:
+- V0 – Heart Rate (BPM)
+- V1 – Body Temperature
+- V2 – SpO₂
+
+### 3. 🤖 Telegram Bot Setup
+
+1. Search for **@BotFather** on Telegram.
+2. Create a new bot and get the token.
+3. Replace `BOT_TOKEN` in code with your Telegram token.
+4. Use **@userinfobot** to get your group chat ID and add it in the sketch.
+
+---
+
+## 🧪 How It Works
+
+### 📈 Health Monitoring
+- Heartbeat and temperature are continuously measured.
+- If sensor data is unavailable (e.g., no finger on sensor), values reset to 0.
+- SpO₂ is estimated (for demo use).
+
+### 🚨 Accident Detection
+- MPU6050 detects sudden motion change.
+- GPS gets location coordinates.
+- Accident alert and location are pushed to Telegram.
+- SOS button triggers emergency message with live GPS location.
+
+---
+
+## 📦 Project Structure
+
+```
+📁 Smart-Monitoring-System
+│
+├── ESP32_Health_Monitor.ino
+├── ESP8266_Accident_Detector.ino
+└── README.md
+```
+
+---
+
+## 📸 Dashboard Demo (Optional Add Screenshots)
+
+- Blynk mobile dashboard with heart rate, temperature, SpO₂ widgets
+- Telegram alert examples with location map
+
+---
+
+## 📞 Contact
+
+For queries or collaborations, reach out to:
+
+📧 **tanmaysingh0828@gmail.com**
+
+---
