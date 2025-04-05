@@ -1,0 +1,137 @@
+/* 🔹 General Styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* 🔹 Centering Container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+/* 🔹 Form Box */
+.form-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 350px;
+}
+
+/* 🔹 Input Fields */
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* 🔹 Error Messages */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* 🔹 Buttons */
+button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+/* 🔹 Toggle Link */
+.toggle-link {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* 🔹 Dashboard Styling */
+.dashboard-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.dashboard-container button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.dashboard-container button:hover {
+  background-color: #0056b3;
+}
+
+/* 🔹 Camera Page Styling */
+.camera-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.camera-container video {
+  width: 400px;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid #333;
+  margin-top: 10px;
+}
+
+.camera-container button {
+  padding: 10px 15px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: #007bff;
+  color: white;
+}
+
+.camera-container button:hover {
+  opacity: 0.8;
+}
+
+/* 🔹 Video Container */
+.video-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+video {
+  width: 300px;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid #333;
+}
