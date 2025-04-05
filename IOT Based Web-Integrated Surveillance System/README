@@ -1,0 +1,251 @@
+🔐 Smart Surveillance System
+
+An AI-powered real-time surveillance platform with facial recognition, motion detection, secure video recording, and cloud-based alerts. Built using state-of-the-art computer vision and secure authentication practices, this system is ideal for smart homes, offices, and remote monitoring.
+
+---
+
+## 🚀 Project Overview
+
+This Smart Surveillance System combines **Flask**, **React**, **YOLOv8**, and **MongoDB** to deliver:
+- 🔍 Smart detection (faces, bodies, objects)
+- 📹 Real-time streaming and recording
+- 🔐 Secure user authentication
+- 📤 Cloud storage options
+- 📱 Future-ready mobile app integration (Flutter/Kotlin)
+
+---
+
+## ✨ Features
+
+| Feature                      | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| 🔴 **Live Feed Monitoring** | View real-time video from your webcam or IP camera                          |
+| 😎 **Face & Body Detection**| Uses Haarcascade and YOLOv8 for detection                                    |
+| ⚠️ **Instant Alerts**        | Send alerts via email/mobile when motion or faces are detected              |
+| ☁️ **Cloud Storage**         | Save recorded videos to cloud platforms like Firebase or AWS                |
+| 🔒 **Access Control**        | Only users with `@surveillance.in` domain can register/login                |
+
+---
+
+## 🧰 Tech Stack
+
+### 🔧 Backend:
+- **Python 3.9+**
+- **Flask**
+- **OpenCV**
+- **YOLOv8 (Ultralytics)**
+- **MongoDB Atlas**
+- **JWT Authentication**
+
+### 💻 Frontend:
+- **ReactJS (with React Router)**
+- **Axios**
+- **Styled with CSS3**
+
+### ☁️ Cloud/DevOps:
+- **Firebase** or **AWS S3** (optional)
+- **WebRTC** for future mobile streaming
+- **dotenv** for environment variables
+
+---
+
+## 📂 Folder Structure
+
+```
+project-root/
+│
+├── backend/
+│   ├── app.py                 # Flask app with YOLO and Haarcascade
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   └── dashboardRoutes.js
+│   ├── models/
+│   │   └── user.js
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   ├── recordings/            # Saved AVI recordings
+│   └── .env                   # Secret keys and Mongo URI
+│
+├── frontend/
+│   ├── src/
+│   │   ├── App.js
+│   │   └── pages/
+│   │       ├── Home.js
+│   │       ├── Dashboard.js
+│   │       ├── Camera.js
+│   │       └── Detection.js
+│   ├── public/
+│   ├── styles.css
+│   └── .env
+│
+├── README.md
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### 🐍 Backend (Flask + YOLOv8)
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # macOS/Linux
+
+pip install -r requirements.txt
+python app.py
+```
+
+### 🌐 Frontend (React)
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+## 🔐 Environment Variables
+
+### 📁 `backend/.env`
+
+```env
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/mern_auth
+JWT_SECRET=your_super_secret_key
+```
+
+### 📁 `frontend/.env`
+
+```env
+REACT_APP_API_URL=http://localhost:5000
+```
+
+---
+
+## 🛠️ API Endpoints
+
+### 🔐 Auth Routes (`/api/auth`)
+- `POST /register` → Register with `@surveillance.in` email
+- `POST /login` → Login and receive JWT token
+
+### 📊 Dashboard Route (`/api/dashboard`)
+- `GET /` → Protected route (JWT required)
+
+### 📹 Stream Routes (Flask backend)
+- `GET /video_feed` → Live camera feed with detection
+- `POST /stop` → Stops streaming and saves the video
+
+---
+
+## 📦 Requirements (Python)
+
+Add this in your `backend/requirements.txt`:
+
+```
+flask
+opencv-python
+ultralytics
+python-dotenv
+```
+
+---
+
+## 🔒 Security Notes
+
+- Passwords hashed using **bcryptjs**
+- JWT token authentication
+- Email restriction to `@surveillance.in` domain
+- Recordings saved in `/recordings` folder (or cloud if enabled)
+
+---
+
+## 📱 Future Enhancements
+
+- Mobile app in **Flutter** or **Kotlin**
+- Cloud upload using **Firebase** or **AWS S3**
+- User dashboard for viewing past recordings
+- Push notifications using **Firebase Cloud Messaging**
+
+---
+
+## 📬 Contact
+
+For questions, contributions, or collaborations:
+
+📧 **tanmaysingh0828@gmail.com**
+
+---
+
+                                            Great catch! Yes, the previous `README.md` **includes the installation steps** for both **backend and frontend**, *but let me highlight and slightly enhance the dependency installation section* so it’s 100% clear and copy-paste ready.
+
+Here’s the **improved and focused section on installing dependencies** (you can replace this section or add it below `📂 Folder Structure`):
+
+---
+
+## ⚙️ Installation & Setup
+
+### 🐍 Backend (Python + Flask + YOLOv8)
+
+> **Step-by-step setup for the backend environment**
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# 🔹 Create virtual environment
+python -m venv venv
+
+# 🔹 Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# 🔹 Install required dependencies
+pip install -r requirements.txt
+```
+
+🧾 If you don’t have a `requirements.txt` yet, create one and paste:
+
+```
+flask
+opencv-python
+ultralytics
+python-dotenv
+```
+
+Then start the Flask server:
+
+```bash
+python app.py
+```
+
+---
+
+### 🌐 Frontend (React + Axios + React Router)
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# 🔹 Install Node.js dependencies
+npm install
+
+# 🔹 Start development server
+npm start
+```
+
+📦 Main frontend dependencies (installed via `npm install`):
+- `axios`
+- `react-router-dom`
+- `dotenv`
+
+You can also add this to `package.json` manually or run:
+
+```bash
+npm install axios react-router-dom dotenv
+```
+
+---
